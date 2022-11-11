@@ -1,0 +1,47 @@
+players: DynArray [address, 420]
+losers: DynArray [address, 420]
+odds: uint256
+playersTurn: uint256
+creator: address
+
+@external  
+def __init__ (creator: address):
+    self.creator = creator
+    self.playersTurn = 0
+
+@external
+def setOdds(oneInThisMany: uint256):
+    if (self.creator == msg.sender):
+        self.odds = oneInThisMany
+
+@external
+def addPlayer(Player: address):
+    if(Player not in self.players):
+        if(Player not in self.losers):
+            self.players.append(Player)
+
+@internal
+def lose(Player: address):
+    self.losers.append(Player)
+    for i in self.players:
+        self.players.pop()
+
+@internal
+def random() -> (uint256):
+    return (block.number % self.odds)
+
+@external
+def play():
+    n: uint256 = self.random()
+    player: address = self.players[self.playersTurn]
+    if(n == 1):
+        self.lose(player)
+    else:
+        self.playersTurn += 1
+
+@external
+def isALoser(person: address) -> (bool):
+    for i in self.losers:
+        if(i == person):
+            return True
+    return False
